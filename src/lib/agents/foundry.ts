@@ -76,12 +76,12 @@ export function parseFoundryContent(content: unknown): FoundryClaimRaw[] {
   const claims = (obj as { claims?: unknown })?.claims;
   if (!Array.isArray(claims) || !claims.length) throw new Error("Model response has no claims array.");
   return claims.slice(0, FOUNDRY_MAX_CLAIMS).map((c, i) => {
-    const r = c as Record<string, unknown>;
+    const r = c as { text?: unknown; factId?: unknown; eventIds?: unknown; metrics?: unknown };
     if (typeof r.text !== "string" || !r.text.trim()) throw new Error(`Claim ${i + 1} has no text.`);
     const eventIds = Array.isArray(r.eventIds) ? r.eventIds.filter((x): x is string => typeof x === "string") : [];
     const metrics = Array.isArray(r.metrics)
       ? r.metrics
-          .map((m) => m as Record<string, unknown>)
+          .map((m) => m as { key?: unknown; value?: unknown })
           .filter((m) => typeof m.key === "string" && typeof m.value === "number" && Number.isFinite(m.value))
           .map((m) => ({ key: m.key as string, value: m.value as number }))
       : [];
