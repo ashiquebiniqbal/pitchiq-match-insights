@@ -31,7 +31,7 @@ export function generateMatch(seed: number = DEFAULT_SEED): Match {
   let t = 0;
   let team: TeamId = "NOR";
   let n = 0;
-  const pick = (tm: TeamId) => PLAYERS[tm][Math.floor(r() * PLAYERS[tm].length)];
+  const pick = (tm: TeamId) => PLAYERS[tm][Math.floor(r() * PLAYERS[tm].length)]!;
   const push = (e: Omit<MatchEvent, "id" | "t" | "minute" | "second">) => {
     n++;
     const tt = Math.min(t, DURATION - 1);

@@ -48,9 +48,9 @@ describe("verification agent", () => {
     const claim: DraftClaim = {
       id: "X", factId: "x", kind: "shots", text: "", slots: {},
       citedValues: [{ key: "home.shots", value: ctx.stats.home.shots + 1 }],
-      eventIds: [match.events[0].id],
+      eventIds: [match.events[0]!.id],
     };
-    const [r] = verifyClaims([claim], ctx).output;
+    const r = verifyClaims([claim], ctx).output[0]!;
     expect(r.status).toBe("fail");
     expect(r.reasons[0]).toContain("home.shots");
   });
@@ -58,6 +58,6 @@ describe("verification agent", () => {
     const last = match.events[match.events.length - 1]!;
     const ctx = { match, t: 60, stats: computeStats(match, 60), events: [], turningPoints: [] };
     const claim: DraftClaim = { id: "Y", factId: "y", kind: "score", text: "", slots: {}, citedValues: [{ key: "home.goals", value: 0 }], eventIds: [last.id] };
-    expect(verifyClaims([claim], ctx).output[0].status).toBe("fail");
+    expect(verifyClaims([claim], ctx).output[0]!.status).toBe("fail");
   });
 });
