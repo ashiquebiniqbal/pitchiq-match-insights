@@ -148,11 +148,11 @@ export function detectTurningPoints(match: Match): TurningPoint[] {
   const mom = computeMomentum(match, match.durationSec);
   let best: { i: number; swing: number } | null = null;
   for (let i = 1; i < mom.length; i++) {
-    const swing = mom[i].net - mom[i - 1].net;
+    const swing = mom[i]!.net - mom[i - 1]!.net;
     if (!best || Math.abs(swing) > Math.abs(best.swing)) best = { i, swing };
   }
-  if (best && mom[best.i].eventIds.length) {
-    const w = mom[best.i];
+  if (best && mom[best.i]!.eventIds.length) {
+    const w = mom[best.i]!;
     const tm: TeamId = best.swing > 0 ? "NOR" : "HAR";
     cands.push({
       id: `TP-W${w.index}`,
@@ -167,7 +167,7 @@ export function detectTurningPoints(match: Match): TurningPoint[] {
       eventIds: w.eventIds,
       metrics: [
         { key: `momentum.${w.index}.net`, label: "Window net momentum", value: w.net },
-        { key: `momentum.${w.index - 1}.net`, label: "Previous window", value: mom[best.i - 1].net },
+        { key: `momentum.${w.index - 1}.net`, label: "Previous window", value: mom[best.i - 1]!.net },
       ],
     });
   }

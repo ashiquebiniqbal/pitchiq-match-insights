@@ -14,6 +14,8 @@ export interface CitedValue {
   value: number;
 }
 
+export type Slots = Partial<Record<"home" | "away" | "hg" | "ag" | "clock" | "minute" | "what" | "why" | "title" | "leader" | "team" | "kind", string | number>>;
+
 export interface Fact {
   id: string;
   kind: "score" | "possession" | "shots" | "passing" | "turning_point";
@@ -21,7 +23,7 @@ export interface Fact {
   metrics: CitedValue[];
   eventIds: string[];
   priority: number;
-  slots: Record<string, string | number>;
+  slots: Slots;
 }
 
 export interface DraftClaim {
@@ -31,7 +33,7 @@ export interface DraftClaim {
   text: string;
   citedValues: CitedValue[];
   eventIds: string[];
-  slots: Record<string, string | number>;
+  slots: Slots;
 }
 
 export interface VerifiedClaim extends DraftClaim {
@@ -205,7 +207,7 @@ export function narrativeWriter(facts: Fact[], opts: { injectFaulty?: boolean } 
 
 /* ---------------- Stage 3: Verification Agent ---------------- */
 export function resolveMetric(key: string, ctx: PipelineContext): number | undefined {
-  const parts = key.split(".");
+  const parts = key.split(".") as [string, string, string];
   if (parts[0] === "home" || parts[0] === "away") {
     const v = (ctx.stats[parts[0]] as unknown as Record<string, number>)[parts[1]];
     return typeof v === "number" ? v : undefined;
