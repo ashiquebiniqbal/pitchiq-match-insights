@@ -164,3 +164,46 @@ export function RecapView({ run, revealed, audience, onCite }: { run: PipelineRu
     </div>
   );
 }
+
+export type FoundryState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "fallback"; message: string; claims?: import("@/lib/agents/pipeline").VerifiedClaim[] }
+  | { status: "verified"; model: string; claims: import("@/lib/agents/pipeline").VerifiedClaim[] };
+
+export function FoundryPanel({ state, disabled, onGenerate, onCite }: { state: FoundryState; disabled: boolean; onGenerate: () => void; onCite: (ids: string[]) => void }) {
+  const claims = state.status === "verified" || state.status === "fallback" ? state.claims ?? [] : [];
+  return (
+    <div className="mt-4 border-t border-border pt-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground">Optional: reword verified facts with Microsoft Foundry (one call per click).</p>
+        <button onClick={onGenerate} disabled={disabled || state.status === "loading"} className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-secondary px-3 text-sm font-medium text-secondary-foreground hover:bg-muted disabled:opacity-40">
+          {state.status === "loading" && <Loader2 className="h-4 w-4 animate-spin" />}Generate with Microsoft Foundry
+        </button>
+      </div>
+      {state.status === "verified" && (
+        <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-success"><CheckCircle2 className="h-3.5 w-3.5" />Microsoft Foundry — live response verified ({state.model})</p>
+      )}
+      {state.status === "fallback" && (
+        <p className="mt-3 flex items-center gap-1.5 text-xs text-warning"><ShieldAlert className="h-3.5 w-3.5" />Local template fallback — {state.message} The recap above is unchanged.</p>
+      )}
+      {claims.length > 0 && (
+        <ul className="mt-2 space-y-2 text-sm">
+          {claims.map((c) => (
+            <li key={c.id} className={cn("flex gap-2", c.status === "fail" && "opacity-60")}>
+              {c.status === "pass" ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" /> : <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />}
+              <span>
+                <span className={cn(c.status === "fail" && "line-through")}>{c.text}</span>{" "}
+                {c.status === "pass" ? (
+                  <button onClick={() => onCite(c.eventIds)} className="font-mono text-[11px] text-accent hover:underline" aria-label={`Show evidence for ${c.id}`}>[{c.id}]</button>
+                ) : (
+                  <span className="block text-[11px] text-destructive">Blocked: {c.reasons.join(" ")}</span>
+                )}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
