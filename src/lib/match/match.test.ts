@@ -55,7 +55,7 @@ describe("verification agent", () => {
     expect(r.reasons[0]).toContain("home.shots");
   });
   it("flags events cited from after the current clock", () => {
-    const last = match.events[match.events.length - 1];
+    const last = match.events[match.events.length - 1]!;
     const ctx = { match, t: 60, stats: computeStats(match, 60), events: [], turningPoints: [] };
     const claim: DraftClaim = { id: "Y", factId: "y", kind: "score", text: "", slots: {}, citedValues: [{ key: "home.goals", value: 0 }], eventIds: [last.id] };
     expect(verifyClaims([claim], ctx).output[0].status).toBe("fail");

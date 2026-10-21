@@ -158,7 +158,7 @@ function Workspace() {
               <button key={tp.id} onClick={() => selectTP(tp)} title={`${tp.minute}' ${tp.title}`} aria-label={`${tp.minute}' ${tp.title}`}
                 className={cn("pointer-events-auto absolute -translate-x-1/2 -translate-y-full rounded px-1 font-mono text-[10px]", selected?.id === tp.id ? "bg-warning text-primary-foreground" : "text-warning hover:bg-warning/20")}
                 style={{ left: `${(tp.t / FT) * 100}%` }}>
-                {tp.minute}'
+                <span className="hidden sm:inline">{tp.minute}'</span><span className="sm:hidden">▾</span>
               </button>
             ))}
           </div>
