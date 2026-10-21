@@ -13,3 +13,4 @@
 - Match data comes only from `src/lib/match/generate.ts` (seeded); never use Math.random in analytics or UI — results must be reproducible and verifiable.
 - Analytics and agent stages are pure functions in `src/lib/match` and `src/lib/agents`; UI components stay presentational so logic stays testable.
 - Recap text may only be built from claims that passed `verifyClaims`; never label template output as AI-generated.
+- Microsoft Foundry is called only from `src/lib/foundry.functions.ts` on explicit user click; model claims must pass `verifyFoundryClaims` before display, so model output is never trusted.

@@ -38,11 +38,29 @@ bun run test
 ```
 
 ## Integrations: honest status
-- **Implemented:** local, deterministic TypeScript only. No backend and no secrets.
-- **Not implemented:** no LLM calls, no Microsoft Foundry, no Azure services, no external APIs. The recaps come from templates, and the UI says so.
+- **Default:** deterministic local templates. No AI model is called on load, during replay, or on timeline changes.
+- **Optional Microsoft Foundry:** the "Generate with Microsoft Foundry" button under the recap makes **one** server-side call to the Foundry OpenAI-compatible v1 Chat Completions API. Facts are recomputed on the server from the seeded synthetic match; only fact summaries, event IDs and computed metrics are sent.
+- Every model claim goes through the local Verification Agent plus a check that every number in the text matches a cited metric. Failing claims are shown struck through with reasons. If credentials are missing, the call fails/times out, or no claim verifies, the UI shows "Local template fallback" and the template recap stays.
+- "Microsoft Foundry — live response verified" appears only after a real successful response with at least one verified claim.
+
+### Foundry setup
+Add three backend secrets (Lovable → Settings → Secrets; never in frontend code):
+| Secret | Example |
+|---|---|
+| `AZURE_FOUNDRY_ENDPOINT` | `https://<resource>.openai.azure.com` or `.../openai/v1` (normalised; route never duplicated) |
+| `AZURE_FOUNDRY_API_KEY` | key from Foundry portal → your deployment → Keys |
+| `AZURE_FOUNDRY_MODEL` | your **deployment name**, e.g. `gpt-4o-mini` |
+
+### Cost controls
+- Click-only; one request per click; button disabled while playing or loading.
+- `max_tokens` 450, `temperature` 0.2, JSON response format, at most 8 facts / 4 event IDs per fact in the prompt, max 6 claims parsed.
+- 20 s timeout via AbortController. A small model deployment (e.g. gpt-4o-mini) is recommended.
+- Keys are read only inside the server handler; logs record HTTP status only.
+
+Tests: `src/lib/agents/foundry.test.ts` covers endpoint normalisation, malformed responses and claim verification.
 
 ## Next steps for submission
 1. Connect GitHub from the Lovable editor (Settings → GitHub) and make the repo public. **No public repo exists yet.**
 2. Publish from Lovable, or deploy the build to any edge host. **The app is not publicly hosted yet.**
-3. Optional: back the Narrative Writer and Audience Adapter with Azure OpenAI / Foundry through a server function, and keep the Verification Agent as the final check.
+3. Add the Foundry secrets above to enable live generation.
 4. Record the demo using `DEMO_SCRIPT.md`.
