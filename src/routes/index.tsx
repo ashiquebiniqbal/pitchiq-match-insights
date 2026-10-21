@@ -9,6 +9,10 @@ import { Pitch, PitchLegend } from "@/components/pitchiq/Pitch";
 import { MomentumChart, StatRows } from "@/components/pitchiq/Charts";
 import { AgentWorkflow, EvidenceTable, RecapView, TurningPointList } from "@/components/pitchiq/Panels";
 import { cn } from "@/lib/utils";
+import { useServerFn } from "@tanstack/react-start";
+import { generateFoundryRecap } from "@/lib/foundry.functions";
+import { verifyFoundryClaims } from "@/lib/agents/foundry";
+import { FoundryPanel, type FoundryState } from "@/components/pitchiq/Panels";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -57,6 +61,8 @@ function Workspace() {
   const [inject, setInject] = useState(false);
   const [types, setTypes] = useState<Set<EventType>>(new Set(TYPES));
   const [revealed, setRevealed] = useState(4);
+  const [foundry, setFoundry] = useState<FoundryState>({ status: "idle" });
+  const callFoundry = useServerFn(generateFoundryRecap);
 
   useEffect(() => {
     if (!playing) return;
@@ -83,6 +89,25 @@ function Workspace() {
     const timers = [1, 2, 3, 4].map((n) => setTimeout(() => setRevealed(n), n * 280));
     return () => timers.forEach(clearTimeout);
   }, [recapT, audience, inject, playing]);
+
+  // Any clock/audience change invalidates a previous Foundry result (no auto re-call).
+  useEffect(() => { setFoundry({ status: "idle" }); }, [recapT, audience]);
+
+  async function onFoundry() {
+    const at = recapT;
+    setFoundry({ status: "loading" });
+    try {
+      const r = await callFoundry({ data: { t: at, audience } });
+      if (!r.ok) return setFoundry({ status: "fallback", message: r.message });
+      const ctx = { match: MATCH, t: at, stats: computeStats(MATCH, at), events: MATCH.events.filter((e) => e.t <= at), turningPoints: TPS };
+      const claims = verifyFoundryClaims(r.claims, ctx);
+      const passed = claims.filter((c) => c.status === "pass");
+      if (!passed.length) return setFoundry({ status: "fallback", message: "Foundry responded, but no claim passed verification.", claims });
+      setFoundry({ status: "verified", model: r.model, claims });
+    } catch {
+      setFoundry({ status: "fallback", message: "Foundry request failed." });
+    }
+  }
 
   const evidenceIds = cited ?? selected?.eventIds ?? null;
   const highlight = useMemo(() => new Set(evidenceIds ?? []), [evidenceIds]);
@@ -229,6 +254,7 @@ function Workspace() {
             </div>
           </div>
           <RecapView run={run} revealed={revealed} audience={audience} onCite={(ids) => { setCited(ids); setSelected(null); setFocusId(ids[ids.length - 1] ?? null); }} />
+          <FoundryPanel state={foundry} disabled={playing || run.analyst.status === "empty"} onGenerate={onFoundry} onCite={(ids) => { setCited(ids); setSelected(null); setFocusId(ids[ids.length - 1] ?? null); }} />
         </section>
 
         {/* Agents */}
