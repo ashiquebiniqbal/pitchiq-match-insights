@@ -4,8 +4,10 @@
 
 Built for Microsoft's *Inside the Game: Developer Hackathon*.
 
-- **Public demo:** _coming soon (the app has not been published yet)_
-- **Demo video:** _coming soon (no video has been uploaded yet; see `DEMO_SCRIPT.md`)_
+Public demo: https://match-moments-explained.lovable.app
+
+Demo video: https://youtube.com/shorts/DlJfZDGLmio
+
 
 > **Synthetic data statement:** Northbridge FC, Harbor City, every player and every event are fictional and generated from a fixed seed. No real league data, official logos or footage are used. No endorsement by any league, club or Microsoft is implied.
 
