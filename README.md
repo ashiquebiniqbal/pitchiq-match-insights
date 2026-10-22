@@ -87,7 +87,7 @@ Test files:
 - One seeded synthetic match; no real data import.
 - Recaps come from templates; the Foundry path is untested live.
 - Possession is approximated by pass share, not ball-time.
-- Not yet publicly hosted.
+
 
 ## Future plans
 - Load multiple matches and custom seeds or event files.
